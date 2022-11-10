@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-#prints a string 10 times
-x=1
-while [ $x -ne 11 ]
+# Displays "Best School" 10 times using a while loop.
+#   On the 9th iteration, displays "Hi" before "Best School".
+
+count=0
+
+while [ $count -lt 10 ]
 do
-  if [ $x -eq 9 ]
+  if [ $count -eq 9 ]
   then
     echo "Hi"
-  else
-    echo "Holberton School"
   fi
-  x=$(( x + 1 ))
+  echo "Best School"
+  (( count++ ))
 done
