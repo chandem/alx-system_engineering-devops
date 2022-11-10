@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # informations about a file.
 
-FILE="holbertonschool"
+FILE="bestschool"
 
 if [ -e "$FILE" ]
 then
-    echo "holbertonschool file exists"
+    echo "bestschool file exists"
     if [ ! -s "$FILE" ]
     then
         echo "bestschool file is empty"
