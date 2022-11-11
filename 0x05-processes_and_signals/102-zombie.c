@@ -1,6 +1,6 @@
 /*
  * File: 102-zombie.c
- * Auth: Chane Eshetu 
+ * Auth: Brennan D Baraban
  */
 
 #include <stdio.h>
