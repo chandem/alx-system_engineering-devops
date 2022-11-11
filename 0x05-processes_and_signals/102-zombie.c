@@ -48,5 +48,5 @@ int main(void)
 
 	infinite_while();
 
-	return Success;
+	return (Exit_Success);
 }
