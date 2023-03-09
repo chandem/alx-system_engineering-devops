@@ -1,61 +1,39 @@
 # Postmortem
 
-Upon the release of ALX's System Engineering & DevOps project 0x19, approximately 06:00 West African Time (WAT) here in Nigeria, an outage occurred on an isolated Ubuntu 14.04 container running an Apache web server. GET requests on the server led to 500 Internal Server Error's, when the expected response was an HTML file defining a simple Holberton WordPress site.
+Issue Summary:
 
-## Debugging Process
+Duration: 4 hours (10:00 AM - 2:00 PM EST)
+Impact: Users were unable to access the website, leading to a 50% decrease in traffic during the outage.
+Root Cause: A misconfiguration in the load balancer resulted in a denial of service (DoS) attack on the web server.
 
-Bug debugger Bamidele (Lexxyla... as in my actual initials... made that up on the spot, pretty
-good, huh?) encountered the issue upon opening the project and being, well, instructed to
-address it, roughly 19:20 PST. He promptly proceeded to undergo solving the problem.
+Timeline:
 
-1. Checked running processes using `ps aux`. Two `apache2` processes - `root` and `www-data` -
-were properly running.
+10:00 AM - The issue was detected by an engineer who received an alert from the monitoring system.
+10:05 AM - The engineer checked the web server and found that it was unresponsive. The engineer assumed that the server was overloaded and began investigating possible causes.
+10:30 AM - After investigating, the engineer found that the load balancer was misconfigured and was sending an excessive number of requests to the web server.
+11:00 AM - The engineer attempted to fix the issue by adjusting the load balancer settings but found that the issue persisted.
+12:00 PM - The engineer consulted with the network team, who identified the cause of the issue as a DoS attack on the web server.
+1:00 PM - The network team implemented a solution to mitigate the attack and restored normal traffic to the website.
+2:00 PM - The issue was resolved, and the website was fully functional.
 
-2. Looked in the `sites-available` folder of the `/etc/apache2/` directory. Determined that
-the web server was serving content located in `/var/www/html/`.
+Root Cause and Resolution:
 
-3. In one terminal, ran `strace` on the PID of the `root` Apache process. In another, curled
-the server. Expected great things... only to be disappointed. `strace` gave no useful
-information.
+The root cause of the outage was a misconfiguration in the load balancer, which resulted in a DoS attack on the web server. The load balancer was configured to send too many requests to the web server, overwhelming it and causing it to crash.
 
-4. Repeated step 3, except on the PID of the `www-data` process. Kept expectations lower this
-time... but was rewarded! `strace` revelead an `-1 ENOENT (No such file or directory)` error
-occurring upon an attempt to access the file `/var/www/html/wp-includes/class-wp-locale.phpp`.
+To resolve the issue, the network team implemented a solution to mitigate the attack. They blocked the IP addresses responsible for the attack and adjusted the load balancer settings to prevent a similar attack from occurring in the future.
 
-5. Looked through files in the `/var/www/html/` directory one-by-one, using Vim pattern
-matching to try and locate the erroneous `.phpp` file extension. Located it in the
-`wp-settings.php` file. (Line 137, `require_once( ABSPATH . WPINC . '/class-wp-locale.php' );`).
+Corrective and Preventative Measures:
 
-6. Removed the trailing `p` from the line.
+To prevent similar outages from occurring in the future, the following measures will be implemented:
 
-7. Tested another `curl` on the server. 200 A-ok!
+1. Regular load testing will be conducted to ensure that the load balancer is configured correctly and can handle peak traffic.
+2. The monitoring system will be improved to provide more detailed alerts in case of similar incidents.
+3. Network security will be enhanced to prevent DoS attacks, including the use of intrusion detection and prevention systems.
+4. The incident response plan will be updated to ensure a quicker response time and better coordination between teams.
 
-8. Wrote a Puppet manifest to automate fixing of the error.
+Tasks to address the issue:
 
-## Summation
-
-In short, a typo. Gotta love'em. In full, the WordPress app was encountering a critical
-error in `wp-settings.php` when tyring to load the file `class-wp-locale.phpp`. The correct
-file name, located in the `wp-content` directory of the application folder, was
-`class-wp-locale.php`.
-
-Patch involved a simple fix on the typo, removing the trailing `p`.
-
-## Prevention
-
-This outage was not a web server error, but an application error. To prevent such outages
-moving forward, please keep the following in mind.
-
-* Test! Test test test. Test the application before deploying. This error would have arisen
-and could have been addressed earlier had the app been tested.
-
-* Status monitoring. Enable some uptime-monitoring service such as
-[UptimeRobot](./https://uptimerobot.com/) to alert instantly upon outage of the website.
-
-Note that in response to this error, I wrote a Puppet manifest
-[0-strace_is_your_friend.pp](https://github.com/Toluope05/alx-system_engineering-devops/blob/main/0x17-web_stack_debugging_3/0-strace_is_your_friend.pp)
-to automate fixing of any such identitical errors should they occur in the future. The manifest
-replaces any `phpp` extensions in the file `/var/www/html/wp-settings.php` with `php`.
-
-But of course, it will never occur again, because we're programmers, and we never make
-errors! :wink:
+1. Review load balancer configuration and ensure that it is optimized for peak traffic.
+2. Implement intrusion detection and prevention systems to prevent DoS attacks.
+3. Conduct regular load testing to ensure that the system can handle peak traffic.
+4. Update the incident response plan to improve coordination between teams during outages.
